@@ -1,0 +1,13 @@
+id,family,description,trading_profit,expected_income_tax,expected_class4,expected_total,worked_by,checked_by_ceo
+T001,band-edge,At the personal allowance,12570,0.00,0.00,0.00,Autostrata,pending
+T002,basic,Basic rate,20000,1486.00,445.80,1931.80,Autostrata,pending
+T003,basic,Plan 4.6.2 low case,40000,5486.00,1645.80,7131.80,Autostrata,pending
+T004,band-edge,At the higher-rate threshold,50270,7540.00,2262.00,9802.00,Autostrata,pending
+T005,higher,Plan 4.6.2 mean case,55000,9432.00,2356.60,11788.60,Autostrata,pending
+T006,higher,Higher rate,60000,11432.00,2456.60,13888.60,Autostrata,pending
+T007,higher,Plan 4.6.2 high case,70000,15432.00,2656.60,18088.60,Autostrata,pending
+T008,band-edge,Taper starts,100000,27432.00,3256.60,30688.60,Autostrata,pending
+T009,taper,Inside the 62% band,110000,33432.00,3456.60,36888.60,Autostrata,pending
+T010,band-edge,Allowance fully withdrawn,125140,42516.00,3759.40,46275.40,Autostrata,pending
+T011,additional,Additional rate,150000,53703.00,4256.60,57959.60,Autostrata,pending
+T012,loss,A loss year,-5000,0.00,0.00,0.00,Autostrata,pending

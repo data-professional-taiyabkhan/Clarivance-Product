@@ -1,0 +1,24 @@
+# Rule set: 2026-27, England, Wales and Northern Ireland.
+# Scope: sole-trader trading profit (cash basis), no other income, reliefs or allowances.
+# STATUS: draft values used by the plan; must be checked against GOV.UK and signed off by the CEO.
+id: 2026-27_EWNI_v0
+tax_year: {start: 2026-04-06, end: 2027-04-05}
+jurisdiction: England, Wales and Northern Ireland
+income_tax:
+  personal_allowance: 12570
+  taper_threshold: 100000
+  taper_rate: 0.5            # £1 of allowance lost per £2 above the threshold
+  bands:                     # on taxable income (after the personal allowance)
+    - {name: basic,      up_to: 37700,  rate: 0.20}
+    - {name: higher,     up_to: 125140, rate: 0.40}
+    - {name: additional, up_to: null,   rate: 0.45}
+class4_ni:
+  lower_profits_limit: 12570
+  upper_profits_limit: 50270
+  main_rate: 0.06
+  upper_rate: 0.02
+payments_on_account:
+  share_each: 0.5
+  minimum_previous_bill: 1000
+signed_off_by: null
+signed_off_on: null

@@ -1,0 +1,2 @@
+-r ../engine/requirements.txt
+Django>=5.1,<6
