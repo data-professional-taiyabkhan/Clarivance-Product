@@ -180,10 +180,23 @@ _PERSONAL = re.compile(r"tesco|sainsbury|asda|aldi|lidl|morrisons|waitrose|netfl
                        r"council tax|mortgage|rent\b|gym|cash withdrawal|atm|tv licen", re.I)
 
 
-def categorise(t: RawTransaction, business_only_account: bool) -> str:
+def _is_owner(description: str, owner_names: tuple[str, ...]) -> bool:
+    """'From Mohammad Taiyab K' is the owner moving their own money: match at least two name words."""
+    words = set(re.findall(r"[a-z]+", description.lower()))
+    for name in owner_names:
+        parts = [w for w in re.findall(r"[a-z]+", (name or "").lower()) if len(w) > 1]
+        if len(parts) >= 2 and sum(w in words for w in parts) >= 2:
+            return True
+    return False
+
+
+def categorise(t: RawTransaction, business_only_account: bool, owner_names: tuple[str, ...] = ()) -> str:
     d = t.description
     if _HMRC.search(d):
-        return HMRC
+        # money from HMRC is a refund (VAT or tax), never trading income
+        return OTHER_IN if t.amount > 0 else HMRC
+    if owner_names and _is_owner(d, owner_names):
+        return OTHER_IN if t.amount > 0 else PERSONAL
     if _TRANSFER.search(d):
         return TRANSFER
     if t.amount > 0:

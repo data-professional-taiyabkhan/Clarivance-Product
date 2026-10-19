@@ -98,6 +98,18 @@ class PilotFlow(TestCase):
         self.assertAlmostEqual(h["safe_to_spend_today"], h["cash_at_bank"] - h["tax_pot_should_hold"], places=1)
         self.assertEqual(self.client.get("/api/me/what-if?amount=1000").status_code, 200)
 
+    def test_owner_transfers_and_recategorise(self):
+        self.register()                                     # name "Pat"; set a full name on the profile
+        csv = b"Date,Description,Amount,Balance\n01/10/2026,From Pat Jones,500.00,500.00\n02/10/2026,Client Co INV 1,900.00,1400.00\n"
+        self.client.post("/api/me/statements", {"file": SimpleUploadedFile("s.csv", csv)})
+        cats = {t["description"]: t["category"] for t in self.client.get("/api/me/transactions").json()["transactions"]}
+        self.assertEqual(cats["From Pat Jones"], "income")            # name not known yet
+        self.client.put("/api/me/profile", json.dumps({"name": "Pat Jones"}), content_type="application/json")
+        self.assertEqual(self.post("/api/me/transactions/recategorise", {}).json()["changed"], 1)
+        cats = {t["description"]: t["category"] for t in self.client.get("/api/me/transactions").json()["transactions"]}
+        self.assertEqual(cats["From Pat Jones"], "other_in")
+        self.assertEqual(cats["Client Co INV 1"], "income")
+
     def test_bad_file(self):
         self.register()
         r = self.client.post("/api/me/statements", {"file": SimpleUploadedFile("s.csv", b"hello,world\nfoo,bar")})

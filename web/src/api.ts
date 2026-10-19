@@ -28,7 +28,7 @@ export type Position = {
 export type WhatIf = { amount: number; tax_on_it: number; keep: number; effective_rate: number; chance_over_50270_after: number };
 export type Me = { authenticated: boolean; email?: string; name?: string; profile_done?: boolean; has_transactions?: boolean };
 export type Profile = {
-  name: string; business_name: string; trade: string; trading_since: string; last_year_bill: number;
+  name: string; business_name: string; trade: string; business_type: string; trading_since: string; last_year_bill: number;
   paid_towards_this_year: number; last_year_balance_owed: number; cash_override: number | null; confidence: number; profile_done: boolean;
 };
 export type Txn = { id: number; day: string; description: string; amount: number; balance: number | null; category: string; client: string; user_edited: boolean };
@@ -90,6 +90,7 @@ export const api = {
   },
   setCategory: (id: number, category: string, applyToSimilar: boolean) =>
     call<{ updated: number }>(`/api/me/transactions/${id}`, json("PATCH", { category, apply_to_similar: applyToSimilar })),
+  recategorise: () => call<{ changed: number }>("/api/me/transactions/recategorise", { method: "POST" }),
   invoices: () => call<{ invoices: OpenInvoice[] }>("/api/me/invoices"),
   addInvoice: (d: { client: string; reference: string; issued: string; amount: number }) => call<{ invoices: OpenInvoice[] }>("/api/me/invoices", json("POST", d)),
   deleteInvoice: (id: number) => call<{ deleted: boolean }>(`/api/me/invoices/${id}`, { method: "DELETE" }),

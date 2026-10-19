@@ -53,7 +53,7 @@ def _dec(v, default=None):
 # ---------------------------------------------------------------- profile
 
 def _profile_json(p: Profile) -> dict:
-    return {"name": p.name, "business_name": p.business_name, "trade": p.trade,
+    return {"name": p.name, "business_name": p.business_name, "trade": p.trade, "business_type": p.business_type,
             "trading_since": p.trading_since.isoformat(), "last_year_bill": float(p.last_year_bill),
             "paid_towards_this_year": float(p.paid_towards_this_year),
             "last_year_balance_owed": float(p.last_year_balance_owed),
@@ -71,6 +71,8 @@ def profile(request):
             for f in ("name", "business_name", "trade"):
                 if f in d:
                     setattr(p, f, str(d[f] or "").strip()[:120])
+            if d.get("business_type") in ("sole_trader", "limited_company", "partnership"):
+                p.business_type = d["business_type"]
             if d.get("trading_since"):
                 p.trading_since = date.fromisoformat(d["trading_since"])
             for f in ("last_year_bill", "paid_towards_this_year", "last_year_balance_owed"):
@@ -117,6 +119,7 @@ def statements(request):
     except StatementError as e:
         return JsonResponse({"error": str(e)}, status=400)
     learned = _learned_rules(request.user)
+    owners = _owner_names(request.user)
     with db_transaction.atomic():
         st = Statement.objects.create(user=request.user, filename=f.name[:200], business_only=business_only,
                                       rows=len(raw), first_day=min(r.day for r in raw), last_day=max(r.day for r in raw))
@@ -127,7 +130,7 @@ def statements(request):
             if r.fingerprint in existing:
                 continue
             client = counterparty(r.description)
-            cat = learned.get((client, r.amount > 0)) or categorise(r, business_only)
+            cat = learned.get((client, r.amount > 0)) or categorise(r, business_only, owners)
             new.append(Transaction(user=request.user, statement=st, fingerprint=r.fingerprint, day=r.day,
                                    description=r.description[:300], amount=Decimal(str(r.amount)),
                                    balance=None if r.balance is None else Decimal(str(r.balance)),
@@ -137,6 +140,29 @@ def statements(request):
         st.save()
     return JsonResponse({"id": st.id, "rows": st.rows, "imported": st.imported, "duplicates": st.duplicates,
                          "first_day": st.first_day.isoformat(), "last_day": st.last_day.isoformat()}, status=201)
+
+
+def _owner_names(user) -> tuple[str, ...]:
+    p = Profile.objects.filter(user=user).first()
+    return tuple(n for n in (p and p.name, user.first_name, user.get_full_name()) if n)
+
+
+@api_login_required
+@require_http_methods(["POST"])
+def recategorise(request):
+    """Re-run the automatic categories on every transaction the person hasn't corrected by hand."""
+    from clarivance_engine.ingest import RawTransaction
+    owners = _owner_names(request.user)
+    business_only = {s.id: s.business_only for s in request.user.statements.all()}
+    changed = 0
+    for t in request.user.transactions.filter(user_edited=False):
+        r = RawTransaction(t.day, t.description, float(t.amount))
+        cat = categorise(r, business_only.get(t.statement_id, True), owners)
+        if cat != t.category:
+            t.category = cat
+            t.save(update_fields=["category"])
+            changed += 1
+    return JsonResponse({"changed": changed})
 
 
 def _learned_rules(user) -> dict:
@@ -271,6 +297,12 @@ def position(request):
     first = request.user.transactions.order_by("day").values_list("day", flat=True).first()
     ys = tax_year_start(b.as_of)
     warnings = []
+    if p.business_type != "sole_trader":
+        kind = "a limited company" if p.business_type == "limited_company" else "a partnership"
+        warnings.append(f"Your profile says this is {kind}. Clarivance currently works out tax for sole traders only "
+                        "(income tax and Class 4 NI). "
+                        + ("A limited company pays corporation tax and you pay tax on salary and dividends, so these figures don't apply yet."
+                           if p.business_type == "limited_company" else "Partnership profit shares aren't supported yet, so treat these figures as a rough guide."))
     if first and first > ys and b.trading_since < first:
         warnings.append(f"Your statements start on {first:%d %B %Y}, after this tax year began on {ys:%d %B %Y}. "
                         "Income before then isn't counted, so the tax figures will be too low. Upload statements from "

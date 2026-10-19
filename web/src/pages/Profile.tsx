@@ -21,7 +21,8 @@ export default function Profile() {
     e.preventDefault(); setErr(null);
     try {
       setP(await api.saveProfile({ ...p, last_year_bill: p.last_year_bill ?? 0, paid_towards_this_year: p.paid_towards_this_year ?? 0, last_year_balance_owed: p.last_year_balance_owed ?? 0 }));
-      await refresh(); setMsg("Saved."); if (params.get("welcome")) nav("/app/upload");
+      const r = await api.recategorise().catch(() => ({ changed: 0 }));
+      await refresh(); setMsg(r.changed ? `Saved. ${r.changed} transactions from your own name were moved out of income.` : "Saved."); if (params.get("welcome")) nav("/app/upload");
     } catch (x) { setErr((x as Error).message); }
   };
   const del = async () => {
@@ -34,8 +35,16 @@ export default function Profile() {
       <form className="card form" onSubmit={save}>
         <h2>{params.get("welcome") ? "Welcome. First, your tax profile" : "Your tax profile"}</h2>
         <p className="muted">These answers set your payments on account. If you're not sure, your last Self Assessment calculation (SA302) or HMRC online account has them.</p>
-        <label>Your name<input value={p.name} onChange={txt("name")} /></label>
+        <label>Your full name <span className="hint">as it appears on bank transfers, so we can spot money you move in yourself</span><input value={p.name} onChange={txt("name")} /></label>
         <label>Business name<input value={p.business_name} onChange={txt("business_name")} /></label>
+        <label>Business type
+          <select value={p.business_type} onChange={(e) => setP({ ...p, business_type: e.target.value })}>
+            <option value="sole_trader">Sole trader (self-employed)</option>
+            <option value="limited_company">Limited company</option>
+            <option value="partnership">Partnership</option>
+          </select>
+          {p.business_type !== "sole_trader" && <span className="hint">The pilot works out tax for sole traders only. Other business types will see a warning.</span>}
+        </label>
         <label>What you do<input placeholder="e.g. Electrician" value={p.trade} onChange={txt("trade")} /></label>
         <label>Self-employed since<input type="date" required value={p.trading_since} onChange={txt("trading_since")} /></label>
         <label>Last year's Self Assessment bill (£) <span className="hint">income tax + Class 4 NI for 2025-26; 0 if this is your first year</span>

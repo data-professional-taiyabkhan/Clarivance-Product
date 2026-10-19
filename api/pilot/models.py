@@ -14,6 +14,9 @@ class Profile(models.Model):
     name = models.CharField(max_length=120, blank=True)
     business_name = models.CharField(max_length=120, blank=True)
     trade = models.CharField(max_length=120, blank=True)
+    business_type = models.CharField(max_length=20, default="sole_trader",
+                                     choices=[("sole_trader", "Sole trader"), ("limited_company", "Limited company"),
+                                              ("partnership", "Partnership")])
     trading_since = models.DateField(default=date(2025, 4, 6))
     last_year_bill = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     paid_towards_this_year = models.DecimalField(max_digits=12, decimal_places=2, default=0)

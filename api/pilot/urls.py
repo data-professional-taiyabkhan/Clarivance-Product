@@ -7,6 +7,7 @@ urlpatterns = [
     path("statements", v.statements),
     path("statements/<int:sid>", v.statement_detail),
     path("transactions", v.transactions),
+    path("transactions/recategorise", v.recategorise),
     path("transactions/<int:tid>", v.transaction_detail),
     path("invoices", v.invoices),
     path("invoices/<int:iid>", v.invoice_detail),

@@ -104,3 +104,5 @@ td.pos { color: #1f7a4d; } .nowrap { white-space: nowrap; }
 form.inline { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px 12px; align-items: end; }
 form.inline button { margin-bottom: 12px; }
 @media (max-width: 720px) { .mainnav { width: 100%; } .toolbar .controls { width: 100%; } }
+
+.ghostbtn { background: #fff; border-color: var(--line); color: var(--ink); font-weight: 500; font-size: 13px; }

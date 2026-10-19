@@ -17,6 +17,11 @@ export default function Transactions() {
     setNote(r.updated > 1 ? `Updated ${r.updated} transactions from the same payee.` : "Updated.");
     load();
   };
+  const recheck = async () => {
+    const r = await api.recategorise();
+    setNote(r.changed ? `Re-checked: ${r.changed} transactions moved to a better category. Your own corrections were kept.` : "Re-checked: nothing needed changing.");
+    load();
+  };
   if (!data) return <div className="loading">Loading…</div>;
   return (
     <section className="card">
@@ -34,6 +39,7 @@ export default function Transactions() {
       <div className="filters">
         <input placeholder="Search description or payee" value={q} onChange={(e) => { setQ(e.target.value); setPage(1); }} />
         <label className="check"><input type="checkbox" checked={similar} onChange={(e) => setSimilar(e.target.checked)} /><span>Apply changes to other payments from the same payee</span></label>
+        <button className="ghostbtn" onClick={recheck} title="Uses your profile name to spot money you moved in or out yourself">Re-check automatic categories</button>
       </div>
       {note && <p className="ok">{note}</p>}
       <div className="tablewrap">

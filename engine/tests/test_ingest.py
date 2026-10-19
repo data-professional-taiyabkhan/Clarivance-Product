@@ -77,3 +77,14 @@ def test_whole_number_profile_values():
     raw = parse_csv((F / "starling.csv").read_bytes())
     txns = [CategorisedTransaction(r.fingerprint, r.day, r.description, r.amount, categorise(r, True), r.balance) for r in raw]
     run(build_business("u", "n", "t", txns, TaxProfile(date(2024, 4, 6), 8850, 4420, 300)))
+
+
+def test_owner_money_and_hmrc_refunds_are_not_income():
+    from clarivance_engine.ingest import OTHER_IN, RawTransaction
+    own = RawTransaction(date(2026, 10, 2), "From Mohammad Taiyab K", 59.0)
+    assert categorise(own, True, ("Mohammad Taiyab Khan",)) == OTHER_IN
+    assert categorise(own, True, ()) == INCOME                       # no name known: default stays income
+    assert categorise(RawTransaction(date(2026, 9, 7), "Money added from HMRC VAT — 502920818", 11.1), True) == OTHER_IN
+    assert categorise(RawTransaction(date(2026, 1, 31), "HMRC Self Assessment", -500.0), True) == HMRC
+    client = RawTransaction(date(2026, 6, 30), "From MAGNIFLOW LIMITED — Web solution", 150.0)
+    assert categorise(client, True, ("Mohammad Taiyab Khan",)) == INCOME
