@@ -45,6 +45,12 @@ python manage.py runserver 127.0.0.1:8000
 cd web && npm install && npm run dev        # http://localhost:5173 (proxies /api to :8000)
 ```
 
+## Hosted demo (Render)
+
+`render.yaml` is a Render Blueprint: one free web service (Frankfurt) builds the React app and runs
+Django with gunicorn, serving both the API and the web app. Set `DEMO_PASSWORD` in Render; the browser
+then asks for it (any username). `/api/health` stays open for Render's health check.
+
 ## API
 
 | Endpoint | Returns |

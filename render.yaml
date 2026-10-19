@@ -1,0 +1,25 @@
+# Render Blueprint: one web service runs the Django API and serves the built React app.
+services:
+  - type: web
+    name: clarivance-prototype
+    runtime: python
+    plan: free
+    region: frankfurt
+    branch: main
+    buildCommand: >-
+      pip install -r api/requirements.txt &&
+      cd web && npm ci && npm run build
+    startCommand: cd api && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 60
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: NODE_VERSION
+        value: 20.18.0
+      - key: DJANGO_DEBUG
+        value: "0"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DEMO_PASSWORD
+        sync: false

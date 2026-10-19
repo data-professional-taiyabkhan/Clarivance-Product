@@ -7,3 +7,4 @@ api/db.sqlite3
 .venv/
 .env
 *.tsbuildinfo
+api/staticfiles/

@@ -28,3 +28,15 @@ class ApiTests(SimpleTestCase):
         self.assertEqual(self.client.get("/api/businesses/dan?as_of=bad").status_code, 400)
         self.assertEqual(self.client.get("/api/businesses/dan?confidence=2").status_code, 400)
         self.assertEqual(self.client.get("/api/businesses/dan/what-if?amount=-5").status_code, 400)
+
+
+class DemoPasswordTests(SimpleTestCase):
+    def test_password_gate(self):
+        import base64
+        with self.settings(DEMO_PASSWORD="s3cret"):
+            self.assertEqual(self.client.get("/api/businesses").status_code, 401)
+            self.assertEqual(self.client.get("/api/health").status_code, 200)
+            good = "Basic " + base64.b64encode(b"demo:s3cret").decode()
+            bad = "Basic " + base64.b64encode(b"demo:nope").decode()
+            self.assertEqual(self.client.get("/api/businesses", HTTP_AUTHORIZATION=good).status_code, 200)
+            self.assertEqual(self.client.get("/api/businesses", HTTP_AUTHORIZATION=bad).status_code, 401)
