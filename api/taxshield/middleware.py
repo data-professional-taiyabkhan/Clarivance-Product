@@ -1,4 +1,7 @@
-"""Shared-password gate for the hosted demo. The method is a trade secret, so the demo is not public."""
+"""Optional shared-password gate for the demo businesses only (/demo and /api/businesses...).
+
+Pilot users have their own accounts (and an invite code), so the rest of the site is not behind this gate.
+"""
 import base64
 import hmac
 
@@ -14,7 +17,8 @@ class DemoPasswordMiddleware:
 
     def __call__(self, request):
         password = settings.DEMO_PASSWORD
-        if not password or request.path in OPEN_PATHS:
+        gated = request.path.startswith("/demo") or request.path.startswith("/api/businesses")
+        if not password or not gated or request.path in OPEN_PATHS:
             return self.get_response(request)
         header = request.META.get("HTTP_AUTHORIZATION", "")
         if header.startswith("Basic "):

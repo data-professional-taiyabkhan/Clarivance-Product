@@ -1,6 +1,6 @@
 import { Area, CartesianGrid, ComposedChart, Line, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import type { Band, Payment } from "./api";
-import { gbp, shortDay } from "./format";
+import type { Band, Payment } from "../api";
+import { gbp, shortDay } from "../format";
 
 export default function Curve({ data, payments, confidence }: { data: Band[]; payments: Payment[]; confidence: number }) {
   const rows = data.map((d) => ({ ...d, band: [d.p10, d.p90] as [number, number] }));

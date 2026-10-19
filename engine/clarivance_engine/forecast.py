@@ -165,10 +165,12 @@ def simulate(b: Business, n: int = 2000, seed: int = 7) -> Simulation:
         k = max(k, 1)
         if (k - 1) // 7 < WEEKS:
             expenses[:, (k - 1) // 7] += rng.choice(exp_hist, size=n) * np.sqrt(level)
-    draw_hist = [o.amount for o in b.outflows if o.kind == "drawings"][-6:]
+    # personal drawings and transfers out: average monthly total over the last six full months
+    recent = [o for o in b.outflows if o.kind == "drawings" and (as_of - o.day).days <= 183]
     drawings = np.zeros(WEEKS)
-    if draw_hist:
-        monthly = float(np.mean(draw_hist))
+    if recent:
+        months_seen = max(1.0, min(6.0, (as_of - min(o.day for o in recent)).days / 30.44))
+        monthly = sum(o.amount for o in recent) / months_seen
         for m in months_ahead:
             k = max(((m + timedelta(days=27)) - as_of).days, 1)
             if (k - 1) // 7 < WEEKS:

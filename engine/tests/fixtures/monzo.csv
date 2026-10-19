@@ -1,0 +1,3 @@
+Transaction ID,Date,Time,Type,Name,Emoji,Category,Amount,Currency,Local amount,Local currency,Notes and #tags,Address,Receipt,Description,Category split,Money Out,Money In
+tx_1,02/10/2026,09:01:00,Faster payment,Northbank Advisory,,Income,4600.00,GBP,4600.00,GBP,Invoice 7,,,,,,4600.00
+tx_2,03/10/2026,12:30:00,Card payment,Pret A Manger,,Eating out,-6.45,GBP,-6.45,GBP,,,,,,-6.45,

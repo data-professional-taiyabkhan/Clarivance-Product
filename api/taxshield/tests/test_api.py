@@ -36,6 +36,7 @@ class DemoPasswordTests(SimpleTestCase):
         with self.settings(DEMO_PASSWORD="s3cret"):
             self.assertEqual(self.client.get("/api/businesses").status_code, 401)
             self.assertEqual(self.client.get("/api/health").status_code, 200)
+            self.assertEqual(self.client.get("/api/auth/me").status_code, 200)   # pilot accounts are not gated
             good = "Basic " + base64.b64encode(b"demo:s3cret").decode()
             bad = "Basic " + base64.b64encode(b"demo:nope").decode()
             self.assertEqual(self.client.get("/api/businesses", HTTP_AUTHORIZATION=good).status_code, 200)

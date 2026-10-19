@@ -75,8 +75,8 @@ def safe_to_spend_curve(b: Business, sim: Simulation, r: RuleSet, payments: list
     ys = tax_year_start(b.as_of)
     week_ends = np.array([(w - b.as_of).days for w in sim.weeks])
     paid = np.zeros((n, W))
-    paid_cur = np.full((n, W), b.paid_towards_current_year)
-    prev_owed = np.full((n, W), max(b.prev_balancing_outstanding, 0.0))
+    paid_cur = np.full((n, W), float(b.paid_towards_current_year))
+    prev_owed = np.full((n, W), float(max(b.prev_balancing_outstanding, 0.0)))
     for p in payments:
         k = int(((p.due - b.as_of).days - 1) // 7)
         paid[:, k:] += p.amount[:, None]

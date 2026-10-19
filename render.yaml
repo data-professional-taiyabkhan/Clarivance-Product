@@ -1,4 +1,11 @@
-# Render Blueprint: one web service runs the Django API and serves the built React app.
+# Render Blueprint: one web service (Django API + built React app) and a Postgres database.
+databases:
+  - name: clarivance-db
+    plan: free            # free Postgres expires after 30 days on Render; move to basic-256mb before real pilot use
+    region: frankfurt
+    databaseName: clarivance
+    user: clarivance
+
 services:
   - type: web
     name: clarivance-prototype
@@ -9,7 +16,7 @@ services:
     buildCommand: >-
       pip install -r api/requirements.txt &&
       cd web && npm ci && npm run build
-    startCommand: cd api && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 60
+    startCommand: cd api && python manage.py migrate --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 60
     healthCheckPath: /api/health
     autoDeploy: true
     envVars:
@@ -21,5 +28,11 @@ services:
         value: "0"
       - key: DJANGO_SECRET_KEY
         generateValue: true
-      - key: DEMO_PASSWORD
+      - key: DATABASE_URL
+        fromDatabase:
+          name: clarivance-db
+          property: connectionString
+      - key: DEMO_PASSWORD          # protects /demo only
+        sync: false
+      - key: PILOT_INVITE_CODE      # registration stays closed until this is set
         sync: false

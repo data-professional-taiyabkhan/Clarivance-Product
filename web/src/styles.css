@@ -55,3 +55,52 @@ th { color: var(--muted); font-weight: 500; font-size: 12px; }
 tr.late td { color: var(--neg); }
 footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
 @media (max-width: 720px) { .hero { grid-template-columns: 1fr; } .who { text-align: left; } .wide { overflow-x: auto; } }
+
+/* ---- pilot app ---- */
+a { color: var(--teal); }
+.brand { text-decoration: none; }
+.pill { font-family: Inter, sans-serif; font-size: 11px; font-weight: 600; color: var(--gold-ink); background: #fff7e0; border: 1px solid var(--gold); border-radius: 999px; padding: 1px 8px; margin-left: 6px; letter-spacing: 0; }
+.mainnav { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
+.mainnav a { color: var(--ink); text-decoration: none; font-weight: 500; padding: 6px 2px; }
+.mainnav a.active { color: var(--teal); border-bottom: 2px solid var(--teal); }
+.btn, a.btn { display: inline-block; text-decoration: none; background: var(--gold); color: var(--navy); font-weight: 600; padding: 10px 16px; border-radius: 10px; border: 1px solid var(--gold); }
+.btn.small { padding: 6px 12px; }
+.btn.ghost { background: #fff; border-color: var(--line); color: var(--ink); }
+button.link { background: none; border: none; color: var(--teal); padding: 0; font-weight: 500; }
+button.danger { background: var(--neg); border-color: var(--neg); color: #fff; margin-top: 8px; }
+button:disabled { opacity: .55; cursor: not-allowed; }
+.toolbar { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; align-items: end; margin-bottom: 16px; }
+.toolbar .banner { margin: 0; flex: 1 1 320px; }
+.warn { background: #fff7e0; border: 1px solid var(--gold); color: var(--gold-ink); padding: 10px 14px; border-radius: 10px; margin-bottom: 12px; font-size: 14px; }
+.authbox { max-width: 460px; margin: 32px auto; }
+.authbox h1, .welcome h1 { font-family: "Playfair Display", Georgia, serif; color: var(--navy); margin: 0 0 8px; }
+form label, .form label, .card > label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: var(--ink); margin-bottom: 12px; }
+form input, form select { width: 100%; }
+.hint { color: var(--muted); font-size: 12px; font-weight: 400; }
+label.check { flex-direction: row; align-items: flex-start; gap: 8px; font-size: 13px; color: var(--ink); }
+label.check input { width: auto; margin-top: 3px; }
+.errtext { color: var(--neg); font-size: 14px; }
+.ok { color: #1f7a4d; font-size: 14px; }
+.small { font-size: 12px; }
+.welcome { max-width: 980px; margin: 0 auto; }
+.hero-welcome h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.1; }
+.lead { font-size: 17px; color: var(--ink); max-width: 640px; }
+.ctas { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.grid.three { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-bottom: 16px; }
+.onboarding ol { line-height: 2; } .onboarding li.done { text-decoration: line-through; color: var(--muted); }
+.drop { border: 2px dashed var(--line); border-radius: 14px; padding: 36px 16px; text-align: center; color: var(--muted); cursor: pointer; margin: 12px 0; background: var(--bg); }
+.drop:hover { border-color: var(--teal); color: var(--teal); } .drop.busy { opacity: .6; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+.chips button { background: #fff; border: 1px solid var(--line); color: var(--ink); font-weight: 500; font-size: 13px; padding: 6px 10px; }
+.chips button span { color: var(--muted); margin-left: 4px; }
+.chips button.on { background: var(--navy); color: #fff; border-color: var(--navy); } .chips button.on span { color: #c9d3e0; }
+.filters { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 8px; }
+.filters input[type=text], .filters input:not([type]) { flex: 1 1 260px; }
+.tablewrap { overflow-x: auto; }
+td select { padding: 4px 6px; font-size: 13px; max-width: 260px; }
+td.pos { color: #1f7a4d; } .nowrap { white-space: nowrap; }
+.pager { display: flex; gap: 12px; align-items: center; justify-content: center; margin-top: 12px; }
+.pager button { background: #fff; border-color: var(--line); color: var(--ink); }
+form.inline { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px 12px; align-items: end; }
+form.inline button { margin-bottom: 12px; }
+@media (max-width: 720px) { .mainnav { width: 100%; } .toolbar .controls { width: 100%; } }

@@ -1,4 +1,4 @@
-# Clarivance — product prototype (v0)
+# Clarivance — pilot app (v0.2)
 
 A working prototype of the product described in the Clarivance AI business plan (sections 4.1–4.6):
 one number, **safe to spend today**, a 52-week **cash-after-tax curve** with an uncertainty band,
@@ -10,6 +10,32 @@ Built by Autostrata for Clarivance AI Ltd, for handover to Clarivance's CTO.
 > **Status:** prototype on **synthetic data**. No bank connection yet, no customer data, no accounts or
 > login. Tax rules are the 2026–27 England, Wales and NI values for sole-trader trading profit, **awaiting
 > sign-off by the CEO**. Figures are estimates, not tax advice.
+
+## Pilot: how a user gets their figures
+
+1. **Register** at `/register` (email + password; an invite code is required in production via `PILOT_INVITE_CODE`).
+2. **Tax profile** (`/app/profile`): self-employed since, last year's Self Assessment bill, payments on account
+   already made, any balance still owed, optional current balance, and how cautious the reserve should be.
+3. **Upload** a bank statement CSV (`/app/upload`). `engine/clarivance_engine/ingest.py` reads Monzo, Starling,
+   Lloyds/Halifax, Barclays, NatWest, HSBC, Nationwide, Revolut, Tide and generic formats; duplicates are skipped
+   on re-upload. `docs/sample-statement-starling.csv` is an invented 18-month statement for testing.
+4. **Review categories** (`/app/transactions`): income, money in that isn't income, business expense,
+   personal/drawings, HMRC, own-account transfer. A correction can be applied to every payment from the same
+   payee, and is remembered for later uploads.
+5. **Unpaid invoices** (`/app/invoices`) so the forecast and "chase it" actions include money not yet received.
+6. **Dashboard** (`/app`): safe to spend today, the 52-week curve, TaxShield, CashRadar and ActionFlow on their
+   own data, with warnings when the statement doesn't cover the whole tax year.
+7. **Data rights**: download all data as JSON; delete the account and everything with it.
+
+`/demo` keeps the three invented businesses (optionally behind `DEMO_PASSWORD`).
+
+## Adding Open Banking later
+
+`ingest.RawTransaction` is the seam. An Open Banking provider (TrueLayer, Yapily or Plaid) returns
+transactions that map one-to-one onto it (date, description, signed amount, running balance, a stable
+transaction id as the fingerprint). The provider's consent flow replaces the upload page; categorising,
+corrections, the engine and the dashboard stay the same. Clarivance would operate under the provider's
+FCA permissions as its agent, so that registration has to be in place before any live bank is connected.
 
 ## Layout
 
@@ -27,7 +53,7 @@ engine/   Python computation service (the tax engine). numpy only; no web framew
     synthetic.py              seeded synthetic businesses based on plan 6.3 (Dan, Marek, Steady)
   scenarios/suite-v0.csv      worked tax scenarios (to be re-worked and signed off by the CEO)
   tests/                      golden numbers from plan 4.6.2, payments on account, speed, etc.
-api/      Django JSON API over the engine (plan 4.5: Django app + separate computation service)
+api/      Django: taxshield/ = engine API and demo; pilot/ = accounts, statements, transactions, invoices
 web/      React + TypeScript home screen (Vite, Recharts)
 ```
 
