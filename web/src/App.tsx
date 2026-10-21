@@ -51,6 +51,12 @@ function RequireAuth() {
   return me.authenticated ? <Outlet /> : <Navigate to="/signin" replace />;
 }
 
+function GuestOnly({ children }: { children: JSX.Element }) {
+  const { me } = useAuth();
+  if (!me) return <Waking />;
+  return me.authenticated ? <Navigate to="/app" replace /> : children;
+}
+
 function Root() {
   const { me } = useAuth();
   if (!me) return <Waking />;
@@ -63,8 +69,8 @@ export default function App() {
       <Routes>
         <Route element={<Shell />}>
           <Route path="/" element={<Root />} />
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/signin" element={<GuestOnly><SignIn /></GuestOnly>} />
+          <Route path="/register" element={<GuestOnly><Register /></GuestOnly>} />
           <Route path="/demo" element={<Demo />} />
           <Route element={<RequireAuth />}>
             <Route path="/app" element={<Home />} />
