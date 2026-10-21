@@ -10,8 +10,12 @@ WEB_DIST = BASE_DIR.parent / "web" / "dist"
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-only-not-secret")
 DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
 # Always allow local names (Render health checks, tests); add public hosts via DJANGO_ALLOWED_HOSTS.
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver"] + [h for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",") if h]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver", "healthcheck.railway.app"] + [h for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",") if h]
 CSRF_TRUSTED_ORIGINS = [o for o in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",") if o]
+for _var in ("RAILWAY_PUBLIC_DOMAIN",):           # Railway sets this when a public domain is generated
+    if os.environ.get(_var):
+        ALLOWED_HOSTS.append(os.environ[_var])
+        CSRF_TRUSTED_ORIGINS.append("https://" + os.environ[_var])
 if os.environ.get("RENDER_EXTERNAL_HOSTNAME"):
     ALLOWED_HOSTS.append(os.environ["RENDER_EXTERNAL_HOSTNAME"])
     CSRF_TRUSTED_ORIGINS.append("https://" + os.environ["RENDER_EXTERNAL_HOSTNAME"])
@@ -46,6 +50,7 @@ DEMO_PASSWORD = os.environ.get("DEMO_PASSWORD", "")
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_SSL_REDIRECT = True
+    SECURE_REDIRECT_EXEMPT = [r"^api/health$"]      # platform health checks call over plain HTTP
     SECURE_HSTS_SECONDS = 3600
     SESSION_COOKIE_SECURE = True
 
