@@ -30,6 +30,14 @@ export default function Upload() {
     if (!confirm("Delete this statement and its transactions?")) return;
     await api.deleteStatement(id); await load(); await refresh();
   };
+  const sample = async () => {
+    setBusy(true); setErr(null); setMsg(null);
+    try {
+      const r = await api.loadSample();
+      setMsg(r.imported ? `Loaded the sample statement: ${r.imported} invented transactions.` : "The sample statement is already loaded.");
+      await load(); await refresh();
+    } catch (e) { setErr((e as Error).message); } finally { setBusy(false); }
+  };
   const template = URL.createObjectURL(new Blob([TEMPLATE], { type: "text/csv" }));
 
   return (
@@ -48,6 +56,7 @@ export default function Upload() {
         </div>
         {msg && <p className="ok">{msg} <Link to="/app/transactions">Check the categories →</Link></p>}
         {err && <p className="errtext">{err}</p>}
+        <p className="small"><button className="ghostbtn" onClick={sample} disabled={busy}>No statement to hand? Use sample data</button></p>
         <p className="small muted">Works with Monzo, Starling, Lloyds, Halifax, Barclays, NatWest, HSBC, Nationwide, Revolut, Tide and most others.
           If yours doesn't read, use <a href={template} download="clarivance-template.csv">this template</a>.</p>
       </div>

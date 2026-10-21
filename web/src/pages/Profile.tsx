@@ -62,6 +62,9 @@ export default function Profile() {
         {err && <p className="errtext">{err}</p>}
         {msg && <p className="ok">{msg}</p>}
         <button>Save{params.get("welcome") ? " and upload a statement" : ""}</button>
+        {params.get("welcome") && <p className="small muted">Just looking around? <button type="button" className="link" onClick={async () => {
+          await api.loadSample(); await refresh(); nav("/app/transactions?sample=1");
+        }}>Skip this and use sample data</button></p>}
       </form>
       <div className="card">
         <h3>Your data</h3>

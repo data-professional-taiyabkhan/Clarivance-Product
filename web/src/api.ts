@@ -83,6 +83,7 @@ export const api = {
     const fd = new FormData(); fd.append("file", file); fd.append("business_only", String(businessOnly));
     return call<{ imported: number; duplicates: number; rows: number; first_day: string; last_day: string }>("/api/me/statements", { method: "POST", body: fd });
   },
+  loadSample: () => call<{ imported: number; duplicates: number; rows: number; first_day: string; last_day: string }>("/api/me/statements/sample", { method: "POST" }),
   deleteStatement: (id: number) => call<{ deleted: boolean }>(`/api/me/statements/${id}`, { method: "DELETE" }),
   transactions: (params: { category?: string; q?: string; page?: number }) => {
     const s = new URLSearchParams(); Object.entries(params).forEach(([k, v]) => v && s.set(k, String(v)));

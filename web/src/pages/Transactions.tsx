@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { api, type TxnPage } from "../api";
 import { gbp, day } from "../format";
 
@@ -8,7 +9,8 @@ export default function Transactions() {
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
   const [similar, setSimilar] = useState(true);
-  const [note, setNote] = useState<string | null>(null);
+  const [params] = useSearchParams();
+  const [note, setNote] = useState<string | null>(params.get("sample") ? "Sample data loaded. These are the categories we picked automatically; change any of them and the dashboard updates." : null);
   const load = useCallback(() => api.transactions({ category, q, page }).then(setData), [category, q, page]);
   useEffect(() => { const t = setTimeout(load, 250); return () => clearTimeout(t); }, [load]);
 
@@ -27,7 +29,7 @@ export default function Transactions() {
     <section className="card">
       <div className="cardhead">
         <h2>Check your transactions</h2>
-        <span className="small muted">The forecast uses these categories. Fix anything that's wrong.</span>
+        <span className="small muted">The forecast uses these categories. Fix anything that's wrong, then <Link to="/app">see your dashboard →</Link></span>
       </div>
       <div className="chips">
         <button className={category === "" ? "on" : ""} onClick={() => { setCategory(""); setPage(1); }}>All</button>

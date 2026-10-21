@@ -110,6 +110,19 @@ class PilotFlow(TestCase):
         self.assertEqual(cats["From Pat Jones"], "other_in")
         self.assertEqual(cats["Client Co INV 1"], "income")
 
+    def test_sample_data_gives_a_full_dashboard(self):
+        self.register()
+        r = self.post("/api/me/statements/sample", {})
+        self.assertEqual(r.status_code, 201, r.content)
+        self.assertGreater(r.json()["imported"], 100)
+        prof = self.client.get("/api/me/profile").json()
+        self.assertTrue(prof["profile_done"])
+        p = self.client.get("/api/me/position").json()
+        self.assertGreater(p["taxshield"]["expected_bill"], 5000)
+        self.assertTrue(p["taxshield"]["payments"])
+        self.assertGreaterEqual(len(p["actionflow"]), 2)
+        self.assertEqual(self.post("/api/me/statements/sample", {}).json()["imported"], 0)   # idempotent
+
     def test_bad_file(self):
         self.register()
         r = self.client.post("/api/me/statements", {"file": SimpleUploadedFile("s.csv", b"hello,world\nfoo,bar")})

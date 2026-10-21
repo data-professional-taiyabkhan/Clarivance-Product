@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link, NavLink, Navigate, Outlet, Route, Routes, useNavigate } from "react-router-dom";
 import { api } from "./api";
 import { AuthProvider, useAuth } from "./auth";
@@ -38,15 +39,21 @@ function Shell() {
   );
 }
 
+function Waking() {
+  const [slow, setSlow] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setSlow(true), 4000); return () => clearTimeout(t); }, []);
+  return <div className="loading">{slow ? "Waking up the server. The first visit after a quiet spell can take up to a minute…" : "Loading…"}</div>;
+}
+
 function RequireAuth() {
   const { me } = useAuth();
-  if (!me) return <div className="loading">Loading…</div>;
+  if (!me) return <Waking />;
   return me.authenticated ? <Outlet /> : <Navigate to="/signin" replace />;
 }
 
 function Root() {
   const { me } = useAuth();
-  if (!me) return <div className="loading">Loading…</div>;
+  if (!me) return <Waking />;
   return me.authenticated ? <Navigate to="/app" replace /> : <Welcome />;
 }
 

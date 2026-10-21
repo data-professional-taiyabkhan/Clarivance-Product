@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 from datetime import date
+from pathlib import Path
 from decimal import Decimal, InvalidOperation
 from functools import wraps
 
@@ -97,6 +98,27 @@ def profile(request):
 
 # ---------------------------------------------------------------- statements
 
+SAMPLE = Path(__file__).parent / "sample" / "sample-statement-starling.csv"
+
+
+@api_login_required
+@require_http_methods(["POST"])
+def load_sample(request):
+    """One click: an invented electrician's 18-month statement plus a matching tax profile, so anyone can see the
+    whole flow without uploading their own bank data. Delete it from the Upload page like any statement."""
+    p, _ = Profile.objects.get_or_create(user=request.user)
+    if not p.profile_done:
+        p.business_name, p.trade, p.business_type = "Sample Electrical (demo data)", "Electrician", "sole_trader"
+        p.trading_since, p.last_year_bill, p.paid_towards_this_year = date(2024, 4, 6), Decimal("8850"), Decimal("4420")
+        p.profile_done = True
+        p.save()
+    resp = _import(request, SAMPLE.read_bytes(), "Sample statement (invented data).csv", True)
+    if resp.status_code == 201 and not request.user.open_invoices.filter(client="Kemp Construction").exists():
+        OpenInvoice.objects.create(user=request.user, client="Kemp Construction", reference="INV 2291 (sample)",
+                                   issued=date(2026, 9, 4), amount=Decimal("2450.00"))
+    return resp
+
+
 @api_login_required
 @require_http_methods(["GET", "POST"])
 def statements(request):
@@ -113,15 +135,18 @@ def statements(request):
         return JsonResponse({"error": "That file is over 5 MB. Export a shorter date range."}, status=400)
     if not f.name.lower().endswith((".csv", ".txt")):
         return JsonResponse({"error": "Upload a CSV file. Most banks offer 'Export as CSV' in online banking."}, status=400)
-    business_only = request.POST.get("business_only", "true") == "true"
+    return _import(request, f.read(), f.name, request.POST.get("business_only", "true") == "true")
+
+
+def _import(request, content: bytes, filename: str, business_only: bool):
     try:
-        raw = parse_csv(f.read())
+        raw = parse_csv(content)
     except StatementError as e:
         return JsonResponse({"error": str(e)}, status=400)
     learned = _learned_rules(request.user)
     owners = _owner_names(request.user)
     with db_transaction.atomic():
-        st = Statement.objects.create(user=request.user, filename=f.name[:200], business_only=business_only,
+        st = Statement.objects.create(user=request.user, filename=filename[:200], business_only=business_only,
                                       rows=len(raw), first_day=min(r.day for r in raw), last_day=max(r.day for r in raw))
         existing = set(request.user.transactions.filter(fingerprint__in=[r.fingerprint for r in raw])
                        .values_list("fingerprint", flat=True))

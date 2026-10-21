@@ -5,6 +5,7 @@ from . import views as v
 urlpatterns = [
     path("profile", v.profile),
     path("statements", v.statements),
+    path("statements/sample", v.load_sample),
     path("statements/<int:sid>", v.statement_detail),
     path("transactions", v.transactions),
     path("transactions/recategorise", v.recategorise),

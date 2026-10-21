@@ -32,6 +32,10 @@ services:
         fromDatabase:
           name: clarivance-db
           property: connectionString
+      - key: DJANGO_ALLOWED_HOSTS
+        value: app.clarivanceai.co.uk
+      - key: CSRF_TRUSTED_ORIGINS
+        value: https://app.clarivanceai.co.uk
       - key: DEMO_PASSWORD          # protects /demo only
         sync: false
       - key: PILOT_INVITE_CODE      # registration stays closed until this is set

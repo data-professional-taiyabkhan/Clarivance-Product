@@ -29,17 +29,20 @@ def weekly_actions(b: Business, sim: Simulation, tax: TaxPosition, curve: Curve,
         pat = sim.patterns[inv.client]
         age = inv.age(b.as_of)
         typical = pat.median_delay
-        if typical >= 21 and inv.amount >= 500:
+        if inv.amount >= 500 and (typical >= 21 or age > 30):
             arrival = sim.outstanding_arrival[inv.id]
             expected = b.as_of + timedelta(days=int(np.median(arrival)))
             candidates.append((inv.amount, inv, age, typical, expected))
     for amount, inv, age, typical, expected in sorted(candidates, key=lambda c: (-c[0], c[1].id))[:1]:
-        text = (f"Invoice {inv.id} ({_fmt(inv.amount)}) to {inv.client} is {age} days old, and "
-                f"{inv.client} usually takes {typical:.0f} days to pay.")
+        ref = f"Invoice {inv.id.replace('open-', '#')}" if not inv.id.startswith("open-") else f"Your invoice to {inv.client}"
+        if typical >= 21:
+            text = (f"{ref} ({_fmt(inv.amount)}) is {age} days old, and {inv.client} usually takes {typical:.0f} days to pay.")
+        else:
+            text = f"{ref} ({_fmt(inv.amount)}) was sent {age} days ago and hasn't been paid."
         if first_negative and first_negative < expected + timedelta(days=7):
             text += f" If it arrives that late, your cash after tax goes below zero in the week of {_d(first_negative)}. Chase it this week."
-        elif age > typical:
-            text += " It is now later than usual. Chase it this week."
+        elif age > max(typical, 30):
+            text += " Chase it this week." if typical < 21 else " It is now later than usual. Chase it this week."
         else:
             continue
         out.append({"kind": "chase", "module": "CashRadar", "text": text})

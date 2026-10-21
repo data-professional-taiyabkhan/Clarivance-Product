@@ -106,3 +106,5 @@ form.inline button { margin-bottom: 12px; }
 @media (max-width: 720px) { .mainnav { width: 100%; } .toolbar .controls { width: 100%; } }
 
 .ghostbtn { background: #fff; border-color: var(--line); color: var(--ink); font-weight: 500; font-size: 13px; }
+.samplebox { margin-top: 16px; padding: 14px 16px; background: var(--bg); border: 1px dashed var(--line); border-radius: 12px; font-size: 14px; }
+.samplebox div { margin-top: 10px; }
